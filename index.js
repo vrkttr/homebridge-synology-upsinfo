@@ -56,7 +56,7 @@ class SynologyUPSInfo {
 
   async updateLoop() {
     try {
-    await ssh.connect({
+    await this.ssh.connect({
       host: this.host,
       port: this.port || 22,
       username: this.username,
