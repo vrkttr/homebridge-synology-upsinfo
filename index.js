@@ -18,6 +18,7 @@ class SynologyUPSInfo {
     this.log = log;
     this.name = config.name || 'Synology UPS';
     this.host = config.host;
+    this.port = config.port || 22;
     this.username = config.username;
     this.password = config.password;
     this.command = config.command || 'upsc ups@localhost';
@@ -58,7 +59,7 @@ class SynologyUPSInfo {
     try {
     await this.ssh.connect({
       host: this.host,
-      port: this.port || 22,
+      port: this.port,
       username: this.username,
       password: this.password
     });
