@@ -56,11 +56,12 @@ class SynologyUPSInfo {
 
   async updateLoop() {
     try {
-      await this.ssh.connect({
-        host: this.host,
-        username: this.username,
-        password: this.password
-      });
+    await ssh.connect({
+      host: this.host,
+      port: this.port || 22,
+      username: this.username,
+      password: this.password
+    });
 
       const result = await this.ssh.execCommand(this.command);
       if (result.stdout) {
