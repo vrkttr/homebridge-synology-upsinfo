@@ -46,7 +46,7 @@ class SynologyUPSInfo {
       .onGet(() => 0);
 
     if (this.includeLoadSensor) {
-      this.loadService = new Service.LightSensor(`${this.name} Load`);
+      this.loadService = new Service.HumiditySensor(`UPS Load`);
       this.loadService
         .getCharacteristic(Characteristic.CurrentRelativeHumidity)
         .onGet(() => Math.max(0.0001, this.load));
