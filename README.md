@@ -25,7 +25,8 @@ Add this to your Homebridge `config.json`:
     {
       "accessory": "SynologyUPSInfo",
       "name": "Synology UPS",
-      "host": "192.168.1.100",
+      "host": "your_synology_ip",
+      "port": 22,
       "username": "your_ssh_user",
       "password": "your_ssh_password",
       "command": "upsc ups@localhost",
@@ -34,6 +35,7 @@ Add this to your Homebridge `config.json`:
     }
   ]
 }
+
 ```
 
 ## Notes
