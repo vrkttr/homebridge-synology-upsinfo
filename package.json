@@ -19,7 +19,6 @@
     "node-ssh": "^13.1.0"
   },
   "homebridge": {
-    "pluginType": "accessory",
-    "schema": "./config.schema.json"
+    "pluginType": "accessory"
   }
 }
