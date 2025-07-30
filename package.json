@@ -1,0 +1,15 @@
+{
+  "name": "homebridge-synology-upsinfo",
+  "version": "1.0.0",
+  "description": "Homebridge plugin that shows UPS battery and runtime status from Synology NAS using SSH.",
+  "main": "index.js",
+  "author": "David Vierkötter",
+  "keywords": ["homebridge-plugin", "synology", "ups", "homebridge", "ssh"],
+  "engines": {
+    "homebridge": ">=1.3.0",
+    "node": ">=16.0.0"
+  },
+  "dependencies": {
+    "node-ssh": "^13.1.0"
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "pluginAlias": "SynologyUPSInfo",
+  "pluginType": "accessory",
+  "schema": {
+    "type": "object",
+    "properties": {
+      "name": {
+        "title": "Gerätename",
+        "type": "string",
+        "default": "Synology UPS"
+      },
+      "host": {
+        "title": "Synology IP/Hostname",
+        "type": "string"
+      },
+      "username": {
+        "title": "SSH Benutzer",
+        "type": "string"
+      },
+      "password": {
+        "title": "SSH Passwort",
+        "type": "string"
+      },
+      "command": {
+        "title": "Kommando zur UPS-Abfrage",
+        "type": "string",
+        "default": "upsc ups@localhost"
+      },
+      "pollInterval": {
+        "title": "Abfrageintervall (Sekunden)",
+        "type": "integer",
+        "default": 60
+      },
+      "includeLoadSensor": {
+        "title": "UPS Load anzeigen",
+        "type": "boolean",
+        "default": false
+      }
+    },
+    "required": ["host", "username", "password"]
+  }
+}
