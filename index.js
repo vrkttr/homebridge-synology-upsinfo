@@ -22,14 +22,13 @@ class SynologyUPSInfo {
     this.username = config.username;
     this.password = config.password;
     this.command = config.command || 'upsc ups@localhost';
-    this.pollInterval = config.pollInterval || 60;
+    this.pollInterval = Math.max(1, config.pollInterval || 60);
     this.includeLoadSensor = config.includeLoadSensor || false;
+    this.readyTimeout = config.readyTimeout || 5000;
 
     this.charge = 100;
     this.runtime = 0;
     this.load = 0;
-
-    this.ssh = new NodeSSH();
 
     this.batteryService = new Service.Battery(this.name);
 
@@ -46,7 +45,7 @@ class SynologyUPSInfo {
       .onGet(() => 0);
 
     if (this.includeLoadSensor) {
-      this.loadService = new Service.HumiditySensor(`UPS Load`);
+      this.loadService = new Service.HumiditySensor('UPS Load');
       this.loadService
         .getCharacteristic(Characteristic.CurrentRelativeHumidity)
         .onGet(() => Math.max(0.0001, this.load));
@@ -56,23 +55,45 @@ class SynologyUPSInfo {
   }
 
   async updateLoop() {
+    let ssh = null;
     try {
-    await this.ssh.connect({
-      host: this.host,
-      port: this.port,
-      username: this.username,
-      password: this.password
-    });
+      ssh = new NodeSSH();
+      await ssh.connect({
+        host: this.host,
+        port: this.port,
+        username: this.username,
+        password: this.password,
+        readyTimeout: this.readyTimeout
+      });
 
-      const result = await this.ssh.execCommand(this.command);
+      const result = await ssh.execCommand(this.command);
+
+      if (result.stderr && !result.stdout) {
+        this.log.warn('UPS command stderr:', result.stderr.trim());
+      }
+
       if (result.stdout) {
         const lines = result.stdout.split('\n');
-        lines.forEach(line => {
-          const [key, value] = line.split(':').map(s => s.trim());
-          if (key === 'battery.charge') this.charge = parseInt(value);
-          if (key === 'battery.runtime') this.runtime = parseInt(value);
-          if (key === 'ups.load') this.load = parseFloat(value);
-        });
+        for (const raw of lines) {
+          const line = raw.trim();
+          if (!line || !line.includes(':')) continue;
+          const [k, vRaw] = line.split(':');
+          const key = k.trim();
+          const value = vRaw.trim();
+
+          if (key === 'battery.charge') {
+            const num = parseInt(value, 10);
+            if (!Number.isNaN(num)) this.charge = num;
+          }
+          if (key === 'battery.runtime') {
+            const num = parseInt(value, 10);
+            if (!Number.isNaN(num)) this.runtime = num;
+          }
+          if (key === 'ups.load') {
+            const num = parseFloat(value);
+            if (!Number.isNaN(num)) this.load = num;
+          }
+        }
 
         this.batteryService.updateCharacteristic(
           Characteristic.BatteryLevel,
@@ -92,10 +113,16 @@ class SynologyUPSInfo {
         }
       }
     } catch (err) {
-      this.log.error('SSH or parsing error:', err.message);
+      this.log.error('SSH or parsing error:', err?.message || String(err));
+    } finally {
+      if (ssh) {
+        try {
+          ssh.dispose();
+        } catch (e) {
+        }
+      }
+      setTimeout(() => this.updateLoop(), this.pollInterval * 1000);
     }
-
-    setTimeout(() => this.updateLoop(), this.pollInterval * 1000);
   }
 
   getServices() {
